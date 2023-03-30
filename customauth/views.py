@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth import get_user_model
 from rest_framework import serializers,generics
 from .models import UserAccount
+from django.core.validators import RegexValidator
 User = get_user_model()
 
 
@@ -14,13 +15,15 @@ def handleSignUp(request):
         'visibility':"none",
     }
     if request.method=="POST":
-        fname = request.POST.get('fname')
-        lname = request.POST.get('lname')
-        username= request.POST.get('username')
-        email = request.POST.get('email')
-        pass1= request.POST.get('pass1')
-        pass2= request.POST.get('pass2')
+        fname = request.data["fname"]
+        lname = request.data["lname"]
+        username= request.data["username"]
+        email = request.data["email"]
+        pass1= request.data["pass1"]
+        pass2= request.data["pass2"]
         # check for errorneous input
+        print(username)
+        print(fname)
         if len(username)> 10 :
             messages.error(request, " Your user name must be under 10 characters")
             return redirect('signup')
@@ -142,6 +145,26 @@ def handlelogout(request):
     messages.success(request, "Successfully logged out")
     return redirect('login')  
 
+class InputSerializer(serializers.Serializer):
+        
+        email = serializers.EmailField()
+        fname = serializers.CharField(required=True)
+        lname = serializers.CharField(required=True)
+        username = serializers.CharField(required=True)
+        # usermoney = serializers.CharField(required=True)
+        pass1 = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Leave empty if no change needed',
+        style={'input_type': 'password', 'placeholder': 'Password'}
+    )
+        pass2 = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Leave empty if no change needed',
+        style={'input_type': 'password', 'placeholder': 'Password'}
+    )
+                
 class AccountSerializer(serializers.Serializer):
       email=serializers.EmailField()
       fname=serializers.CharField(required=True)
@@ -161,6 +184,13 @@ class AccountSerializer(serializers.Serializer):
         style={'input_type': 'password', 'placeholder': 'Password'}
     )
       
+class UserInitApi(generics.GenericAPIView):
+    serializer_class=InputSerializer
+    
+    def post(self, request, *args, **kwargs):
+        print(request.data["username"])
+        handleSignUp(request)
+        
 class AddStock(generics.GenericAPIView):
     serializer_class=AccountSerializer
     
