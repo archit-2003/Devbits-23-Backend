@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 from django.contrib.auth.views import LogoutView
+from .views import AddStock
 
 
 urlpatterns = [
@@ -16,5 +17,6 @@ urlpatterns = [
     path('postsignup', views.handleSignUp),
     path('logout', views.handlelogout),
     # path('accounts/profile', TemplateView.as_view(template_name='accounts/profile.html'), name='profile'),
-    path('', include('social_django.urls', namespace='social'))
+    path('', include('social_django.urls', namespace='social')),
+    path('addStock/', AddStock.as_view(), name='addStock'),
 ]

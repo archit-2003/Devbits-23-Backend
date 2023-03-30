@@ -9,6 +9,7 @@ from django.core.validators import EmailValidator
 # from django.core.exceptions import ValidationError
 # from django.core.validators import validate_email
 from rest_framework import permissions
+# from django.contrib.postgres.fields import ArrayField
 
 class AccountManager(BaseUserManager):
 
@@ -45,8 +46,8 @@ class UserAccount(AbstractBaseUser):
     pass1 = models.CharField(('password'), max_length=128)
     pass2 = models.CharField(('password'), max_length=128)
     usermoney=models.IntegerField(default=1000000)
-    userstocks=[]
-    cart=[]
+    # meta = ArrayField(base_field=models.CharField(max_length=200, null=True), default=list, blank=True)
+    # cart=[]
     
     
     USERNAME_FIELD = "email"

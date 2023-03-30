@@ -103,7 +103,7 @@ def handlelogin(request):
         "visibility":"none",
     }
     if request.method=="POST":
-        print(request)
+        # print(request)
         username= request.POST.get('loginusername')
         password= request.POST.get('loginpassword')
         
@@ -142,28 +142,32 @@ def handlelogout(request):
     messages.success(request, "Successfully logged out")
     return redirect('login')  
 
-# class AccountSerializer(serializers.Serializer):
-#       email=serializers.EmailField()
-#       fname=serializers.CharField(required=True)
-#       lname=serializers.CharField(required=True)
-#       username= serializers.CharField(required=True)
-#       usermoney=serializers.IntegerField()
-#       pass1 = serializers.CharField(
-#         write_only=True,
-#         required=True,
-#         help_text='Leave empty if no change needed',
-#         style={'input_type': 'password', 'placeholder': 'Password'}
-#     )
-#       pass2 = serializers.CharField(
-#         write_only=True,
-#         required=True,
-#         help_text='Leave empty if no change needed',
-#         style={'input_type': 'password', 'placeholder': 'Password'}
-#     )
+class AccountSerializer(serializers.Serializer):
+      email=serializers.EmailField()
+      fname=serializers.CharField(required=True)
+      lname=serializers.CharField(required=True)
+      username= serializers.CharField(required=True)
+      usermoney=serializers.IntegerField()
+      pass1 = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Leave empty if no change needed',
+        style={'input_type': 'password', 'placeholder': 'Password'}
+    )
+      pass2 = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Leave empty if no change needed',
+        style={'input_type': 'password', 'placeholder': 'Password'}
+    )
       
-# class AddStock(generics.GenericAPIView):
-#     serializer_class=AccountSerializer
+class AddStock(generics.GenericAPIView):
+    serializer_class=AccountSerializer
     
-#     def pos(self,request,*args, **kwargs):
-#         user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
-#         user.userstocks.append()
+    def post(self,request,*args, **kwargs):
+        user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
+        user.userstocks.append([])
+        
+    def delete(self,request,*args, **kwargs):
+        user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
+        user.userstocks.remove([])
