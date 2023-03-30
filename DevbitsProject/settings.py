@@ -156,9 +156,8 @@ SOCIALACCOUNT_PROVIDERS = {
 AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
     'social_core.backends.google.GoogleOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
     'customauth.backend.EmailBackend',
-    
+    'django.contrib.auth.backends.ModelBackend',    
 ]
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = "178810889364-500u5vejkbv4iqlb00apbsiu7gef9nmc.apps.googleusercontent.com"

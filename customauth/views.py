@@ -1,6 +1,6 @@
 from django.shortcuts import render ,HttpResponse,redirect
 from django.contrib import messages
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth import get_user_model
 from rest_framework import serializers,generics
@@ -34,7 +34,9 @@ def handleSignUp(request):
         if User.objects.filter(username=username).count()!=0 :
              messages.error(request, "Username already taken")
              return redirect('signup')
-
+        if User.objects.filter(email=email).count()!=0 :
+             messages.error(request, "Email already taken")
+             return redirect('signup')
         if User.objects.filter(username=username).count()!=0 :
             context['visibility']=""
             messages.success(request, "You have been already registered !!")
@@ -140,28 +142,28 @@ def handlelogout(request):
     messages.success(request, "Successfully logged out")
     return redirect('login')  
 
-class AccountSerializer(serializers.Serializer):
-      email=serializers.EmailField()
-      fname=serializers.CharField(required=True)
-      lname=serializers.CharField(required=True)
-      username= serializers.CharField(required=True)
-      usermoney=serializers.IntegerField()
-      pass1 = serializers.CharField(
-        write_only=True,
-        required=True,
-        help_text='Leave empty if no change needed',
-        style={'input_type': 'password', 'placeholder': 'Password'}
-    )
-      pass2 = serializers.CharField(
-        write_only=True,
-        required=True,
-        help_text='Leave empty if no change needed',
-        style={'input_type': 'password', 'placeholder': 'Password'}
-    )
+# class AccountSerializer(serializers.Serializer):
+#       email=serializers.EmailField()
+#       fname=serializers.CharField(required=True)
+#       lname=serializers.CharField(required=True)
+#       username= serializers.CharField(required=True)
+#       usermoney=serializers.IntegerField()
+#       pass1 = serializers.CharField(
+#         write_only=True,
+#         required=True,
+#         help_text='Leave empty if no change needed',
+#         style={'input_type': 'password', 'placeholder': 'Password'}
+#     )
+#       pass2 = serializers.CharField(
+#         write_only=True,
+#         required=True,
+#         help_text='Leave empty if no change needed',
+#         style={'input_type': 'password', 'placeholder': 'Password'}
+#     )
       
-class AddStock(generics.GenericAPIView):
-    serializer_class=AccountSerializer
+# class AddStock(generics.GenericAPIView):
+#     serializer_class=AccountSerializer
     
-    def pos(self,request,*args, **kwargs):
-        user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
-        user.userstocks.append()
+#     def pos(self,request,*args, **kwargs):
+#         user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
+#         user.userstocks.append()

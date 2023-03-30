@@ -20,6 +20,7 @@ class AccountManager(BaseUserManager):
         user = self.model(email=email)
         user.set_password(password)
         user.save(using=self._db)
+        print("H")
         return user
 
     def create_superuser(self, email, password,**extra_fields):
