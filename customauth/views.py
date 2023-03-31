@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth import get_user_model
 from rest_framework import serializers,generics
-from .models import UserAccount
+from .models import UserAccount,Stocks
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse
 from rest_framework.response import Response
@@ -80,13 +80,11 @@ def handleSignUp(request):
             print(user.lname)
             login(request, user,backend='django.contrib.auth.backends.ModelBackend')
             print("Detect")
-            response = Response(data=user_get_me(user=UserAccount.objects.get(email=email)))
-            return response
+            return HttpResponse("User Created")
+            # return render(request, 'home.html',context)
         else:
-            # response = Response(data=user_get_me(user=UserAccount.objects.get(email=email)))
-            return HttpResponse("Bsdk")
-    # response = Response(data=user_get_me(user=UserAccount.objects.get(email=email)))
-    return HttpResponse("Chutiya")
+            return render(request, 'signup.html',context)
+    return render(request, 'signup.html',context)
     # context={
     #     'visibility':"none",
     # }
@@ -219,10 +217,11 @@ class UserInitApi(generics.GenericAPIView):
         context={
             "visibility":"none",
         }
-        response1=handleSignUp(request)
+        response1=response1=handleSignUp(request)
         print(response1)
         return HttpResponse("YO")
         
+        return HttpResponse(response1)
         
 class AddStock(generics.GenericAPIView):
     serializer_class=AccountSerializer
@@ -239,3 +238,17 @@ class AddStock(generics.GenericAPIView):
         print(user)
         return HttpResponse("YO")
         # user.userstocks.remove([])
+        
+class StockSerializer(serializers.Serializer):
+    email=serializers.EmailField()
+    stockname=serializers.CharField(required=True)
+    
+class UserStock(generics.GenericAPIView):
+    serializer_class=StockSerializer
+    
+    def post(self,request,*args, **kwargs):
+        stock=Stocks.objects.filter(email=request.data["stock_user_email"])
+           
+             
+        
+    
