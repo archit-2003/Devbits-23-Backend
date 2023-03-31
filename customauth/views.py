@@ -128,13 +128,13 @@ def handlelogin(request):
         "visibility":"none",
     }
     # if request.method=="POST":
-        # print(request)
+    print(request.data)
     email= request.data["email"]
-    pass1= request.data["password"]
+    password= request.data["password"]
     
     # print(username)
     # print(password)
-    user=authenticate(email= email,pass1=pass1)
+    user=authenticate(email= email,password=password)
     # print(user)
     if user is not None:
         # messages.success(request, "Successfully Logged In")
@@ -190,7 +190,17 @@ class InputSerializer(serializers.Serializer):
         help_text='Leave empty if no change needed',
         style={'input_type': 'password', 'placeholder': 'Password'}
     )
-                
+
+class LoginSerializer(serializers.Serializer):
+        
+        email = serializers.EmailField()
+        password = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Leave empty if no change needed',
+        style={'input_type': 'password', 'placeholder': 'Password'}
+    )                     
+        
 class AccountSerializer(serializers.Serializer):
       email=serializers.EmailField()
       fname=serializers.CharField(required=True)
@@ -238,7 +248,15 @@ class AddStock(generics.GenericAPIView):
         print(user)
         return HttpResponse("YO")
         # user.userstocks.remove([])
-        
+
+class LoginUserApi(generics.GenericAPIView):
+    serializer_class=LoginSerializer
+    
+    def post(self, request, *args, **kwargs):
+        # print(request.data["username"])
+        response1=handlelogin(request)
+        return HttpResponse(response1)
+    
 class StockSerializer(serializers.Serializer):
     email=serializers.EmailField()
     stockname=serializers.CharField(required=True)
