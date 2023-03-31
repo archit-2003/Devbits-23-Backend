@@ -3,7 +3,7 @@ from django.contrib.auth.backends import ModelBackend
 
 class EmailBackend(ModelBackend):
 
-    def authenticate(self, request, email=None, pass1=None, **kwargs):
+    def authenticate(self, request, email=None, password=None, **kwargs):
         # print(username, password)
         UserModel = get_user_model()
         try:
@@ -11,6 +11,6 @@ class EmailBackend(ModelBackend):
         except UserModel.DoesNotExist:
             return None
         else:
-            if user.check_password(pass1):
+            if user.check_password(password):
                 return user
         return None
