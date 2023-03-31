@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth import get_user_model
 from rest_framework import serializers,generics
-from .models import UserAccount
+from .models import UserAccount,Stocks
 from django.core.validators import RegexValidator
 User = get_user_model()
 
@@ -201,3 +201,17 @@ class AddStock(generics.GenericAPIView):
     def delete(self,request,*args, **kwargs):
         user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
         user.userstocks.remove([])
+        
+class StockSerializer(serializers.Serializer):
+    email=serializers.EmailField()
+    stockname=serializers.CharField(required=True)
+    
+class UserStock(generics.GenericAPIView):
+    serializer_class=StockSerializer
+    
+    def post(self,request,*args, **kwargs):
+        stock=Stocks.objects.filter(email=request.data["stock_user_email"])
+           
+             
+        
+    

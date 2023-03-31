@@ -46,8 +46,6 @@ class UserAccount(AbstractBaseUser):
     pass1 = models.CharField(('password'), max_length=128)
     pass2 = models.CharField(('password'), max_length=128)
     usermoney=models.IntegerField(default=1000000)
-    # meta = ArrayField(base_field=models.CharField(max_length=200, null=True), default=list, blank=True)
-    # cart=[]
     
     
     USERNAME_FIELD = "email"
@@ -83,5 +81,6 @@ class UserAccount(AbstractBaseUser):
 class Stocks(AbstractBaseUser):
     stock_name=models.CharField(max_length=100)
     stock_originalprice=models.IntegerField()
-    stock_user=models.CharField(max_length=100)
+    stock_user_email=models.EmailField(verbose_name="Email",validators = [EmailValidator()], max_length=60, unique=True,null=True)
+    
     
