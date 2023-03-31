@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 from django.contrib.auth.views import LogoutView
-from .views import AddStock,UserInitApi,UserStock
+from .views import AddStock,UserInitApi,UserStock,LoginUserApi
 
 
 urlpatterns = [
@@ -21,4 +21,5 @@ urlpatterns = [
     path('addStock/', AddStock.as_view(), name='addStock'),
     path('createuser/', UserInitApi.as_view(), name='createuser'),
     path('StockUser/', UserStock.as_view(), name='StockUser'),
+    path('loginuser/', LoginUserApi.as_view(), name='loginuser'),
 ]
