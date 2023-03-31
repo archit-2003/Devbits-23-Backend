@@ -59,10 +59,11 @@ def handleSignUp(request):
             print(user.lname)
             login(request, user,backend='django.contrib.auth.backends.ModelBackend')
             print("Detect")
-            return render(request, 'home.html',context)
+            return HttpResponse("User Created")
+            # return render(request, 'home.html',context)
         else:
-            return render(request, 'signup.html',context)
-    return render(request, 'signup.html',context)
+            return HttpResponse("Please try again")
+    return HttpResponse("Some error")
     # context={
     #     'visibility':"none",
     # }
@@ -189,7 +190,8 @@ class UserInitApi(generics.GenericAPIView):
     
     def post(self, request, *args, **kwargs):
         print(request.data["username"])
-        handleSignUp(request)
+        response1=handleSignUp(request)
+        return HttpResponse(response1)
         
 class AddStock(generics.GenericAPIView):
     serializer_class=AccountSerializer
