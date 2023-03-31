@@ -5,7 +5,24 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth import get_user_model
 from rest_framework import serializers,generics
 from .models import UserAccount
+from rest_framework.authtoken.models import Token
+from django.http import HttpResponse
+from rest_framework.response import Response
+from django.core.validators import RegexValidator
 User = get_user_model()
+
+
+def user_get_me(*, user: UserAccount):
+    token,_ = Token.objects.get_or_create(user = user)
+    return {
+        'id': user.id,
+        'fname': user.fname,
+        'lname': user.lname,
+        'email': user.email,
+        'username':user.username,
+        'token': token.key,
+        'message': "Your registration was successfull!",
+    }
 
 
 def handleSignUp(request):
@@ -14,30 +31,37 @@ def handleSignUp(request):
         'visibility':"none",
     }
     if request.method=="POST":
-        fname = request.POST.get('fname')
-        lname = request.POST.get('lname')
-        username= request.POST.get('username')
-        email = request.POST.get('email')
-        pass1= request.POST.get('pass1')
-        pass2= request.POST.get('pass2')
+        fname = request.data["fname"]
+        lname = request.data["lname"]
+        username= request.data["username"]
+        email = request.data["email"]
+        pass1= request.data["pass1"]
+        pass2= request.data["pass2"]
         # check for errorneous input
+        print(username)
+        print(fname)
         if len(username)> 10 :
+            print('Hello1')
             messages.error(request, " Your user name must be under 10 characters")
             return redirect('signup')
         if not username.isalnum():
+            print('Hello2')
             messages.error(request, " User name should only contain letters and numbers")
             return redirect('signup')
-
         if (pass1!= pass2):
+             print('Hello3')
              messages.error(request, " Passwords do not match")
              return redirect('signup')
         if User.objects.filter(username=username).count()!=0 :
+             print('Hello4')
              messages.error(request, "Username already taken")
              return redirect('signup')
         if User.objects.filter(email=email).count()!=0 :
+             print('Hello5')
              messages.error(request, "Email already taken")
              return redirect('signup')
         if User.objects.filter(username=username).count()!=0 :
+            print('Hello6')
             context['visibility']=""
             messages.success(request, "You have been already registered !!")
             return redirect('login')            
@@ -56,10 +80,13 @@ def handleSignUp(request):
             print(user.lname)
             login(request, user,backend='django.contrib.auth.backends.ModelBackend')
             print("Detect")
-            return render(request, 'home.html',context)
+            response = Response(data=user_get_me(user=UserAccount.objects.get(email=email)))
+            return response
         else:
-            return render(request, 'signup.html',context)
-    return render(request, 'signup.html',context)
+            # response = Response(data=user_get_me(user=UserAccount.objects.get(email=email)))
+            return HttpResponse("Bsdk")
+    # response = Response(data=user_get_me(user=UserAccount.objects.get(email=email)))
+    return HttpResponse("Chutiya")
     # context={
     #     'visibility':"none",
     # }
@@ -102,24 +129,28 @@ def handlelogin(request):
     context={
         "visibility":"none",
     }
-    if request.method=="POST":
+    # if request.method=="POST":
         # print(request)
-        username= request.POST.get('loginusername')
-        password= request.POST.get('loginpassword')
-        
-        # print(username)
-        # print(password)
-        user=authenticate(username= username,password=password)
-        # print(user)
-        if user is not None:
-            # messages.success(request, "Successfully Logged In")
-            login(request, user)
-            messages.success(request, "Successfully Logged In")
-            return render(request, 'home.html',context)
-        else:
-            messages.error(request, "Invalid credentials! Please try again")
-            return render(request, 'login.html',context)
-    return render(request, 'login.html',context)
+    email= request.data["email"]
+    pass1= request.data["password"]
+    
+    # print(username)
+    # print(password)
+    user=authenticate(email= email,pass1=pass1)
+    # print(user)
+    if user is not None:
+        # messages.success(request, "Successfully Logged In")
+        login(request, user)
+        messages.success(request, "Successfully Logged In")
+        # return render(request, 'home.html',context)
+        return HttpResponse("PAwry")
+    
+    else:
+        messages.error(request, "Invalid credentials! Please try again")
+        return HttpResponse("Hello2")
+        # return render(request, 'login.html',context)
+    # return HttpResponse("Hello1")
+    # return render(request, 'login.html',context)
     # if request.method=="POST":
     #     # Get the post parameters
     #     loginusername=request.POST['loginusername']
@@ -142,32 +173,69 @@ def handlelogout(request):
     messages.success(request, "Successfully logged out")
     return redirect('login')  
 
+class InputSerializer(serializers.Serializer):
+        
+        email = serializers.EmailField()
+        fname = serializers.CharField(required=True)
+        lname = serializers.CharField(required=True)
+        username = serializers.CharField(required=True)
+        # usermoney = serializers.CharField(required=True)
+        pass1 = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Leave empty if no change needed',
+        style={'input_type': 'password', 'placeholder': 'Password'}
+    )
+        pass2 = serializers.CharField(
+        write_only=True,
+        required=True,
+        help_text='Leave empty if no change needed',
+        style={'input_type': 'password', 'placeholder': 'Password'}
+    )
+                
 class AccountSerializer(serializers.Serializer):
       email=serializers.EmailField()
       fname=serializers.CharField(required=True)
       lname=serializers.CharField(required=True)
       username= serializers.CharField(required=True)
       usermoney=serializers.IntegerField()
-      pass1 = serializers.CharField(
-        write_only=True,
-        required=True,
-        help_text='Leave empty if no change needed',
-        style={'input_type': 'password', 'placeholder': 'Password'}
-    )
-      pass2 = serializers.CharField(
-        write_only=True,
-        required=True,
-        help_text='Leave empty if no change needed',
-        style={'input_type': 'password', 'placeholder': 'Password'}
-    )
+    #   pass1 = serializers.CharField(
+    #     write_only=True,
+    #     required=True,
+    #     help_text='Leave empty if no change needed',
+    #     style={'input_type': 'password', 'placeholder': 'Password'}
+    # )
+    #   pass2 = serializers.CharField(
+    #     write_only=True,
+    #     required=True,
+    #     help_text='Leave empty if no change needed',
+    #     style={'input_type': 'password', 'placeholder': 'Password'}
+    # )
       
+class UserInitApi(generics.GenericAPIView):
+    serializer_class=InputSerializer
+    
+    def post(self, request, *args, **kwargs):
+        context={
+            "visibility":"none",
+        }
+        response1=handleSignUp(request)
+        print(response1)
+        return HttpResponse("YO")
+        
+        
 class AddStock(generics.GenericAPIView):
     serializer_class=AccountSerializer
     
     def post(self,request,*args, **kwargs):
-        user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
-        user.userstocks.append([])
+        print(request.data)
+        # user=UserAccount.objects.filter(email=request.data["email"])
+        # print(user)
+        return HttpResponse("YO")
+        # user.userstocks.append([])
         
     def delete(self,request,*args, **kwargs):
-        user=UserAccount.objects.filter(username=request.data["username"],email=request.data["email"])
-        user.userstocks.remove([])
+        user=UserAccount.objects.filter(email=request.data["email"])
+        print(user)
+        return HttpResponse("YO")
+        # user.userstocks.remove([])

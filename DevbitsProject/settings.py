@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'allauth',
     # 'api',
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_yasg',
     'customauth',
     # "corsheaders",
@@ -54,12 +55,19 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # "corsheaders.middleware.CorsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+}
+
 
 ROOT_URLCONF = 'DevbitsProject.urls'
 
@@ -80,6 +88,8 @@ TEMPLATES = [
 ]
 AUTH_USER_MODEL  = "customauth.UserAccount"
 WSGI_APPLICATION = 'DevbitsProject.wsgi.application'
+
+
 
 
 # Database
