@@ -188,7 +188,7 @@ class StockSerializer(serializers.ModelSerializer):
     stock_time=serializers.CharField()
     stock_date=serializers.CharField()
     stock_user_email=serializers.EmailField()
-    cnt=serializers.IntegerField(default=0)
+    cnt=serializers.CharField()
     stock_status=serializers.CharField()
 
     def save(self, **kwargs):
