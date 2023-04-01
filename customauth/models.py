@@ -45,7 +45,7 @@ class UserAccount(AbstractBaseUser):
     username = models.CharField(max_length = 50, blank = True, null = True, unique = True)
     pass1 = models.CharField(('password'), max_length=128)
     pass2 = models.CharField(('password'), max_length=128)
-    usermoney=models.IntegerField(default=1000000)
+    usermoney=models.FloatField(default=1000000.00)
     
     
     USERNAME_FIELD = "email"
@@ -80,15 +80,20 @@ class UserAccount(AbstractBaseUser):
     
 class Stock(models.Model):
     stock_name=models.CharField(max_length=100,default="Bitcoin")
-    stock_originalprice=models.IntegerField(default=0)
+    stock_originalprice=models.FloatField(default=0.00)
     stock_time=models.CharField(default="13:44:34",max_length=100)
     stock_date=models.CharField(default="12-01-2022",max_length=100)
     stock_user_email=models.EmailField(verbose_name="Email",validators = [EmailValidator()], max_length=60, unique=False,null=True,default="a@gmail.com")
-    cnt=models.IntegerField(default=0)
+    cnt=models.CharField(max_length=100,default="0")
     password=models.TimeField(default=timezone.now)
-    stock_status=models.CharField(max_length=100,default="Cart")
+    stock_status=models.CharField(max_length=100,default="Bitcoin")
     
     def __unicode__(self):
         return self.stock_name
     
+class WatchList(models.Model):
+    stock_name=models.CharField(max_length=100,default="Bitcoin")
+    stock_user_email=models.EmailField(verbose_name="Email",validators = [EmailValidator()], max_length=60, unique=False,null=True,default="a@gmail.com")
     
+    def __unicode__(self):
+        return self.stock_name 

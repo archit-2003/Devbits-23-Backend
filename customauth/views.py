@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth import get_user_model
 from rest_framework import serializers,generics,status
-from .models import UserAccount,Stock
+from .models import UserAccount,Stock,WatchList
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse
 from rest_framework.response import Response
@@ -42,29 +42,24 @@ def handleSignUp(request):
         print(fname)
         if len(username)> 10 :
             print('Hello1')
-            messages.error(request, " Your user name must be under 10 characters")
-            return redirect('signup')
+            # messages.error(request, " Your user name must be under 10 characters")
+            return HttpResponse("Your user name must be under 10 characters")
         if not username.isalnum():
             print('Hello2')
-            messages.error(request, " User name should only contain letters and numbers")
-            return redirect('signup')
+            # messages.error(request, " User name should only contain letters and numbers")
+            return HttpResponse("Your user name must be under 10 characters")
         if (pass1!= pass2):
              print('Hello3')
-             messages.error(request, " Passwords do not match")
-             return redirect('signup')
+            #  messages.error(request, " Passwords do not match")
+             return HttpResponse("Passwords do not match")
         if User.objects.filter(username=username).count()!=0 :
              print('Hello4')
-             messages.error(request, "Username already taken")
-             return redirect('signup')
+            #  messages.error(request, "Username already taken")
+             return HttpResponse("Username already taken")
         if User.objects.filter(email=email).count()!=0 :
              print('Hello5')
-             messages.error(request, "Email already taken")
-             return redirect('signup')
-        if User.objects.filter(username=username).count()!=0 :
-            print('Hello6')
-            context['visibility']=""
-            messages.success(request, "You have been already registered !!")
-            return redirect('login')            
+            #  messages.error(request, "Email already taken")
+             return HttpResponse("This email has already been taken")          
         print("HEllo1")
         user = User.objects.create_user(email,pass1)
         print("HEllo2")
@@ -83,45 +78,7 @@ def handleSignUp(request):
             return HttpResponse("User Created")
             # return render(request, 'home.html',context)
         else:
-            return render(request, 'signup.html',context)
-    return render(request, 'signup.html',context)
-    # context={
-    #     'visibility':"none",
-    # }
-    # if request.method=="POST":
-    #     #Get the POST parameters
-    #     username=request.POST['loginusername']
-    #     email=request.POST['email']
-    #     fname=request.POST['fname']
-    #     lname=request.POST['lname']
-    #     pass1=request.POST['loginpassword']
-    #     pass2=request.POST['confirmpassword']
-
-    #     # check for errorneous input
-    #     if len(username)> 10 :
-    #         messages.error(request, " Your user name must be under 10 characters")
-    #         return redirect('signup')
-    #     if not username.isalnum():
-    #         messages.error(request, " User name should only contain letters and numbers")
-    #         return redirect('signup')
-
-    #     if (pass1!= pass2):
-    #          messages.error(request, " Passwords do not match")
-    #          return redirect('signup')  
-        
-    #     if request.user.is_authenticated:
-    #          print("Hello")
-    #     # Create the user
-    #     myuser = User.objects.create_user(username, email, pass1)
-    #     myuser.first_name= fname
-    #     myuser.last_name= lname
-    #     myuser.save()
-        
-    #     messages.success(request, " Your AUTH System ID has been successfully created")
-    #     return redirect('login')
-
-    # else:
-    #     return HttpResponse("404 - Not found") 
+            return HttpResponse("Try again")
     
 def handlelogin(request):
     context={
@@ -146,24 +103,6 @@ def handlelogin(request):
     else:
         messages.error(request, "Invalid credentials! Please try again")
         return HttpResponse("Hello2")
-        # return render(request, 'login.html',context)
-    # return HttpResponse("Hello1")
-    # return render(request, 'login.html',context)
-    # if request.method=="POST":
-    #     # Get the post parameters
-    #     loginusername=request.POST['loginusername']
-    #     loginpassword=request.POST['loginpassword']
-
-    #     user=authenticate(username= loginusername, password= loginpassword)
-    #     if user is not None:
-    #         login(request, user)
-    #         messages.success(request, "Successfully Logged In")
-    #         return redirect("home")
-    #     else:
-    #         messages.error(request, "Invalid credentials! Please try again")
-    #         return redirect("login")
-
-    # return HttpResponse("404- Not found")
 
 
 def handlelogout(request):
@@ -207,18 +146,7 @@ class AccountSerializer(serializers.Serializer):
       lname=serializers.CharField(required=True)
       username= serializers.CharField(required=True)
       usermoney=serializers.IntegerField()
-    #   pass1 = serializers.CharField(
-    #     write_only=True,
-    #     required=True,
-    #     help_text='Leave empty if no change needed',
-    #     style={'input_type': 'password', 'placeholder': 'Password'}
-    # )
-    #   pass2 = serializers.CharField(
-    #     write_only=True,
-    #     required=True,
-    #     help_text='Leave empty if no change needed',
-    #     style={'input_type': 'password', 'placeholder': 'Password'}
-    # )
+
       
 class UserInitApi(generics.GenericAPIView):
     serializer_class=InputSerializer
@@ -231,9 +159,29 @@ class UserInitApi(generics.GenericAPIView):
         print(response1)
         return HttpResponse("YO")
         
-        return HttpResponse(response1)
+        # return HttpResponse(response1)
         
-        
+class WatchSerializer(serializers.ModelSerializer):
+    stock_name=serializers.CharField()
+    stock_user_email=serializers.EmailField()
+    
+    def save(self, **kwargs):
+        data = self.validated_data
+        stock_name = data["stock_name"]
+        stock_user_email = data["stock_user_email"]        
+        watch = WatchList.objects.create(
+            stock_name=stock_name,  
+            stock_user_email=stock_user_email,   
+        )
+        return watch
+    
+    class Meta:
+        model = WatchList
+        fields = [
+            "stock_name",
+            "stock_user_email",            
+        ]
+    
 class StockSerializer(serializers.ModelSerializer):
     stock_name=serializers.CharField()
     stock_originalprice=serializers.IntegerField()
@@ -241,6 +189,7 @@ class StockSerializer(serializers.ModelSerializer):
     stock_date=serializers.CharField()
     stock_user_email=serializers.EmailField()
     cnt=serializers.IntegerField(default=0)
+    stock_status=serializers.CharField()
 
     def save(self, **kwargs):
         data = self.validated_data
@@ -280,17 +229,25 @@ class AddStock(generics.GenericAPIView):
     def get_queryset(self):
         return UserAccount.objects.all()
     def post(self,request,*args, **kwargs):
-        user=UserAccount(email=request.data["stock_time"])
-        totalamount=int(request.data["cnt"])*int(request.data["stock_originalprice"])
+        user=UserAccount.objects.get(email=request.data["stock_user_email"])
+        totalamount=float(request.data["cnt"])*float(request.data["stock_originalprice"])
         serializer = self.get_serializer(data=request.data)
+        print("hi1")
         serializer.is_valid(raise_exception=True)
-        # if totalamount <= user.usermoney:
-        serializer.save()
-        return HttpResponse("DONE") 
-        # else:
-        #     return HttpResponse("NOT ENOUGH MONEY")            
-        # print(user)
-        # user.userStock.append([])
+        print("hi2")
+        user = UserAccount.objects.get(email=user)
+        print(user)
+        if totalamount <= user.usermoney:
+            user.usermoney=user.usermoney-totalamount
+            user.save()
+            
+            print(user.usermoney)
+            # user.save()
+            serializer.save()
+            return HttpResponse("DONE") 
+        else :
+            return HttpResponse("Sorry") 
+    
     def get(self,request):
         queryset = Stock.objects.all()
         context=[]
@@ -305,6 +262,24 @@ class AddStock(generics.GenericAPIView):
                 "stock_status":event.stock_status,
             })
         return Response(context, status=status.HTTP_200_OK)
+    
+    def patch(self,request):
+        user=UserAccount.objects.get(email=request.data["stock_user_email"])
+        sellingprice=float(request.data["cnt"])*float(request.data["updated_price"])  
+        print(user.usermoney)
+        user.usermoney=user.usermoney+sellingprice
+        print(user)
+        print(user.usermoney)
+        # user = UserAccount.objects.get(email=user)
+        # user.save()
+        print(type(sellingprice))
+        serializer = self.get_serializer(data=request.data)
+        print(user)
+        user.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return HttpResponse("Patched")
+                                
         
 class MyUserInfo(generics.ListAPIView):
     serializer_class=AccountSerializer
@@ -335,12 +310,38 @@ class LoginUserApi(generics.GenericAPIView):
         response1=handlelogin(request)
         return HttpResponse(response1)
     
+class WatchApi(generics.GenericAPIView):
+    serializer_class=WatchSerializer
+    def get_queryset(self):
+        return WatchList.objects.all()
+    def post(self,request,*args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        # print("hi1")
+        serializer.is_valid(raise_exception=True) 
+        serializer.save()       
+        return HttpResponse("WatchList Updated")
+    
+    def get(self,request):
+        queryset1 = WatchList.objects.all()
+        context1=[]
+        print(queryset1)
+        for event1 in queryset1:
+            print(event1)
+            # for event in WatchList.objects.filter(stock_user_email=event1.stock_user_email):
+                # print(event.fname)
+            context1.append({
+                "stock_user_email":event1.stock_user_email,
+                "stock_name":event1.stock_name,
+            })
+        context=[]
+        for x in context1:
+            if (x not in context) :
+                context.append(x)
+        print(context)
+        return Response(context, status=status.HTTP_200_OK)        
+        
 class UserStock(generics.GenericAPIView):
     serializer_class=StockSerializer
     
     def post(self,request,*args, **kwargs):
         stock=Stock.objects.filter(email=request.data["stock_user_email"])
-           
-             
-        
-    
