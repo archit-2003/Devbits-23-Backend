@@ -315,6 +315,8 @@ class WatchApi(generics.GenericAPIView):
     def get_queryset(self):
         return WatchList.objects.all()
     def post(self,request,*args, **kwargs):
+        if WatchList.objects.filter(stock_user_email=request.data["stock_user_email"],stock_name=request.data["stock_name"]):
+            return HttpResponse("Stock Already Added")
         serializer = self.get_serializer(data=request.data)
         # print("hi1")
         serializer.is_valid(raise_exception=True) 
@@ -338,7 +340,17 @@ class WatchApi(generics.GenericAPIView):
             if (x not in context) :
                 context.append(x)
         print(context)
-        return Response(context, status=status.HTTP_200_OK)        
+        return Response(context, status=status.HTTP_200_OK)    
+    
+    def delete(self,request):
+        print(request.data)
+        print(request.data["stock_user_email"])
+        print(request.data["stock_name"])           
+        var=WatchList.objects.get(stock_user_email=request.data["stock_user_email"],stock_name=request.data["stock_name"])           
+        var.delete()
+        return Response(
+            {"message": "Team deleted successfully"}, status=status.HTTP_200_OK
+        )
         
 class UserStock(generics.GenericAPIView):
     serializer_class=StockSerializer
