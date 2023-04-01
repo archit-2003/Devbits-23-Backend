@@ -3,8 +3,8 @@ from django.contrib import messages
 # from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth import get_user_model
-from rest_framework import serializers,generics
-from .models import UserAccount,Stocks
+from rest_framework import serializers,generics,status
+from .models import UserAccount,Stock
 from rest_framework.authtoken.models import Token
 from django.http import HttpResponse
 from rest_framework.response import Response
@@ -233,22 +233,100 @@ class UserInitApi(generics.GenericAPIView):
         
         return HttpResponse(response1)
         
-class AddStock(generics.GenericAPIView):
-    serializer_class=AccountSerializer
-    
-    def post(self,request,*args, **kwargs):
-        print(request.data)
-        # user=UserAccount.objects.filter(email=request.data["email"])
-        # print(user)
-        return HttpResponse("YO")
-        # user.userstocks.append([])
         
-    def delete(self,request,*args, **kwargs):
-        user=UserAccount.objects.filter(email=request.data["email"])
-        print(user)
-        return HttpResponse("YO")
-        # user.userstocks.remove([])
+class StockSerializer(serializers.ModelSerializer):
+    stock_name=serializers.CharField()
+    stock_originalprice=serializers.IntegerField()
+    stock_time=serializers.CharField()
+    stock_date=serializers.CharField()
+    stock_user_email=serializers.EmailField()
+    cnt=serializers.IntegerField(default=0)
 
+    def save(self, **kwargs):
+        data = self.validated_data
+        stock_name = data["stock_name"]
+        stock_originalprice = data["stock_originalprice"]
+        stock_time = data["stock_time"]
+        stock_date = data["stock_date"]
+        stock_user_email = data["stock_user_email"]
+        cnt = data["cnt"]
+        stock_status=data["stock_status"]
+        
+        stock = Stock.objects.create(
+            stock_name=stock_name,
+            stock_originalprice=stock_originalprice,
+            stock_time=stock_time,
+            stock_date=stock_date,
+            stock_user_email=stock_user_email,
+            cnt=cnt,      
+            stock_status=stock_status,
+        )
+        return stock
+    
+    class Meta:
+        model = Stock
+        fields = [
+            "stock_name",
+            "stock_originalprice",
+            "stock_time",
+            "stock_date",
+            "stock_user_email",
+            "cnt",
+            "stock_status",
+        ]
+        
+class AddStock(generics.GenericAPIView):
+    serializer_class=StockSerializer
+    def get_queryset(self):
+        return UserAccount.objects.all()
+    def post(self,request,*args, **kwargs):
+        user=UserAccount(email=request.data["stock_time"])
+        totalamount=int(request.data["cnt"])*int(request.data["stock_originalprice"])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # if totalamount <= user.usermoney:
+        serializer.save()
+        return HttpResponse("DONE") 
+        # else:
+        #     return HttpResponse("NOT ENOUGH MONEY")            
+        # print(user)
+        # user.userStock.append([])
+    def get(self,request):
+        queryset = Stock.objects.all()
+        context=[]
+        for event in queryset:
+            context.append({
+                "stock_name": event.stock_name,
+                "stock_originalprice": event.stock_originalprice,
+                "stock_time": event.stock_time,
+                "stock_date": event.stock_date,
+                "stock_user_email":event.stock_user_email,
+                "cnt":event.cnt,
+                "stock_status":event.stock_status,
+            })
+        return Response(context, status=status.HTTP_200_OK)
+        
+class MyUserInfo(generics.ListAPIView):
+    serializer_class=AccountSerializer
+    def get_queryset(self):
+        return UserAccount.objects.all()
+    def get(self,request):
+        queryset1 = UserAccount.objects.all()
+        context=[]
+        print(queryset1)
+        for event1 in queryset1:
+            print(event1)
+            for event in UserAccount.objects.filter(email=event1.email):
+                print(event.fname)
+                context.append({
+                    "email": event.email,
+                    "fname": event.fname,
+                    "lname": event.lname,
+                    "username": event.username,
+                    "usermoney":event.usermoney,
+                })
+        print(context)
+        return Response(context, status=status.HTTP_200_OK)
 class LoginUserApi(generics.GenericAPIView):
     serializer_class=LoginSerializer
     
@@ -257,15 +335,11 @@ class LoginUserApi(generics.GenericAPIView):
         response1=handlelogin(request)
         return HttpResponse(response1)
     
-class StockSerializer(serializers.Serializer):
-    email=serializers.EmailField()
-    stockname=serializers.CharField(required=True)
-    
 class UserStock(generics.GenericAPIView):
     serializer_class=StockSerializer
     
     def post(self,request,*args, **kwargs):
-        stock=Stocks.objects.filter(email=request.data["stock_user_email"])
+        stock=Stock.objects.filter(email=request.data["stock_user_email"])
            
              
         

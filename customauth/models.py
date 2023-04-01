@@ -78,9 +78,17 @@ class UserAccount(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return True
     
-class Stocks(AbstractBaseUser):
-    stock_name=models.CharField(max_length=100)
-    stock_originalprice=models.IntegerField()
-    stock_user_email=models.EmailField(verbose_name="Email",validators = [EmailValidator()], max_length=60, unique=True,null=True)
+class Stock(models.Model):
+    stock_name=models.CharField(max_length=100,default="Bitcoin")
+    stock_originalprice=models.IntegerField(default=0)
+    stock_time=models.CharField(default="13:44:34",max_length=100)
+    stock_date=models.CharField(default="12-01-2022",max_length=100)
+    stock_user_email=models.EmailField(verbose_name="Email",validators = [EmailValidator()], max_length=60, unique=False,null=True,default="a@gmail.com")
+    cnt=models.IntegerField(default=0)
+    password=models.TimeField(default=timezone.now)
+    stock_status=models.CharField(max_length=100,default="Cart")
+    
+    def __unicode__(self):
+        return self.stock_name
     
     
