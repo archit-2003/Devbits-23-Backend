@@ -47,7 +47,7 @@ def handleSignUp(request):
         if not username.isalnum():
             print('Hello2')
             # messages.error(request, " User name should only contain letters and numbers")
-            return HttpResponse("Your user name must be under 10 characters")
+            return HttpResponse("User name should only contain letters and numbers")
         if (pass1!= pass2):
              print('Hello3')
             #  messages.error(request, " Passwords do not match")
@@ -263,21 +263,28 @@ class AddStock(generics.GenericAPIView):
             })
         return Response(context, status=status.HTTP_200_OK)
     
-    def patch(self,request):
+    def patch(self,request,*args, **kwargs):
         user=UserAccount.objects.get(email=request.data["stock_user_email"])
-        sellingprice=float(request.data["cnt"])*float(request.data["updated_price"])  
+        stock=Stock.objects.filter(stock_user_email=request.data["stock_user_email"],stock_name=request.data["stock_name"])
+        # print(stock)
+        for x in stock:
+            x.stock_status="SOLD"
+        # stock1=stock[0]
+        count=0.00
+        for event in Stock.objects.all():
+            if event.stock_name==request.data["stock_name"] and event.stock_user_email==request.data["stock_user_email"]:
+                count+=float(event.cnt)
+        sellingprice=float(count)*float(request.data["updated_price"])  
         print(user.usermoney)
         user.usermoney=user.usermoney+sellingprice
         print(user)
         print(user.usermoney)
-        # user = UserAccount.objects.get(email=user)
-        # user.save()
         print(type(sellingprice))
-        serializer = self.get_serializer(data=request.data)
+        # serializer = self.get_serializer(data=request.data)
         print(user)
         user.save()
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        for x in stock:
+            x.save()
         return HttpResponse("Patched")
                                 
         
