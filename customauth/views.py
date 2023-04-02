@@ -349,11 +349,9 @@ class WatchApi(generics.GenericAPIView):
         print(context)
         return Response(context, status=status.HTTP_200_OK)    
     
-    def delete(self,request):
-        print(request.data)
-        print(request.data["stock_user_email"])
-        print(request.data["stock_name"])           
-        var=WatchList.objects.get(stock_user_email=request.data["stock_user_email"],stock_name=request.data["stock_name"])           
+    def delete(self,request,*args, **kwargs):
+        print(request.data)    
+        var=WatchList.objects.get(stock_user_email=request.data['params']["stock_user_email"],stock_name=request.data['params']["stock_name"])           
         var.delete()
         return Response(
             {"message": "Team deleted successfully"}, status=status.HTTP_200_OK
