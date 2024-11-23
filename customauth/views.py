@@ -155,7 +155,7 @@ class UserInitApi(generics.GenericAPIView):
         context={
             "visibility":"none",
         }
-        response1=response1=handleSignUp(request)
+        response1=handleSignUp(request)
         print(response1)
         return HttpResponse("YO")
         
